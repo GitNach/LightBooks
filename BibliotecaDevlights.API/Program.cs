@@ -87,6 +87,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<AuthorProfile>();
     cfg.AddProfile<BookProfile>();
     cfg.AddProfile<CategoryProfile>();
+    cfg.AddProfile<UserProfile>();
 });
 
 var app = builder.Build();

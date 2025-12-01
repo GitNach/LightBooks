@@ -1,14 +1,11 @@
 ﻿using BibliotecaDevlights.Business.DTOs.Auth;
-using BibliotecaDevlights.Data.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using BibliotecaDevlights.Business.DTOs.User;
 
 namespace BibliotecaDevlights.Business.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<User?> RegisterAsync(RegisterDto request);
-        Task<string?> LoginAsync(LoginDto request);
+        Task<UserDto?> RegisterAsync(RegisterDto request);
+        Task<TokenResponseDto?> LoginAsync(LoginDto request);
     }
 }
