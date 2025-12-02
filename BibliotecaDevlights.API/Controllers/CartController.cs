@@ -10,6 +10,7 @@ namespace BibliotecaDevlights.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
@@ -34,24 +35,6 @@ namespace BibliotecaDevlights.API.Controllers
             }
             var cart = await _cartService.AddItemToCartAsync(userId, addToCart);
             return Ok(cart);
-        }
 
-        // POST api/<CartController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<CartController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<CartController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
