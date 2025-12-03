@@ -62,16 +62,23 @@ namespace BibliotecaDevlights.Data.Repositories.Implementations
         }
         public async Task UpdateCartItemQuantityAsync(int cartItemId, int quantity)
         {
-            await _context.CartItems
-        .Where(ci => ci.Id == cartItemId)
-        .ExecuteUpdateAsync(s => s.SetProperty(ci => ci.Quantity, quantity));
+            var cartItem = await _context.CartItems.FindAsync(cartItemId);
+            if (cartItem != null)
+            {
+                cartItem.Quantity = quantity;
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task RemoveItemFromCartAsync(int cartItemId)
         {
-            await _context.CartItems
-                .Where(ci => ci.Id == cartItemId)
-                .ExecuteDeleteAsync();
+            var cartItem = await _context.CartItems.FindAsync(cartItemId);
+            if (cartItem != null)
+            {
+                _context.CartItems.Remove(cartItem);
+                await _context.SaveChangesAsync();
+            }
+
         }
 
         //Utilities
@@ -80,9 +87,11 @@ namespace BibliotecaDevlights.Data.Repositories.Implementations
            return await _context.Carts.AnyAsync(c => c.UserId == userId);
         }
 
-        public Task<int> GetCartItemCountAsync(int cartId)
+        public async Task<int> GetCartItemCountAsync(int cartId)
         {
-            return _context.CartItems.CountAsync(ci => ci.CartId == cartId);
+            return await _context.CartItems
+                .Where(ci => ci.CartId == cartId)
+                .SumAsync(ci => (int?)ci.Quantity) ?? 0;
         }
         public Task<decimal> GetCartTotalAsync(int cartId)
         {

@@ -24,8 +24,12 @@ namespace BibliotecaDevlights.Business.Services.Implementations
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
             if (cart == null)
                 return null;
-
-            return _mapper.Map<CartDto>(cart);
+            
+            var cartDto = _mapper.Map<CartDto>(cart);
+            cartDto.TotalPrice = await _cartRepository.GetCartTotalAsync(cart.Id);
+            cartDto.ItemCount = await _cartRepository.GetCartItemCountAsync(cart.Id);
+            
+            return cartDto;
         }
 
         public async Task<CartDto> GetOrCreateCartAsync(int userId)
@@ -81,8 +85,7 @@ namespace BibliotecaDevlights.Business.Services.Implementations
                 await _cartRepository.AddItemToCartAsync(cartItem);
             }
 
-            var updatedCart = await _cartRepository.GetCartByUserIdAsync(userId);
-            return _mapper.Map<CartDto>(updatedCart);
+            return await GetCartByUserIdAsync(userId) ?? throw new InvalidOperationException("Error al obtener el carrito actualizado");
         }
 
         public async Task<CartDto> UpdateCartItemQuantityAsync(int userId, int cartItemId, int quantity)
@@ -100,8 +103,7 @@ namespace BibliotecaDevlights.Business.Services.Implementations
 
             await _cartRepository.UpdateCartItemQuantityAsync(cartItemId, quantity);
 
-            var updatedCart = await _cartRepository.GetCartByUserIdAsync(userId);
-            return _mapper.Map<CartDto>(updatedCart);
+            return await GetCartByUserIdAsync(userId) ?? throw new InvalidOperationException("Error al obtener el carrito actualizado");
         }
 
         public async Task<CartDto> RemoveItemFromCartAsync(int userId, int cartItemId)
@@ -114,8 +116,7 @@ namespace BibliotecaDevlights.Business.Services.Implementations
 
             await _cartRepository.RemoveItemFromCartAsync(cartItemId);
 
-            var updatedCart = await _cartRepository.GetCartByUserIdAsync(userId);
-            return _mapper.Map<CartDto>(updatedCart);
+            return await GetCartByUserIdAsync(userId) ?? throw new InvalidOperationException("Error al obtener el carrito actualizado");
         }
 
         public async Task ClearCartAsync(int userId)
