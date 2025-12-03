@@ -1,4 +1,4 @@
-using BibliotecaDevlight.Data.Seeders;
+﻿using BibliotecaDevlight.Data.Seeders;
 using BibliotecaDevlights.Business.Mapping;
 using BibliotecaDevlights.Business.Services.Implementations;
 using BibliotecaDevlights.Business.Services.Interfaces;
@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
-builder.Services.AddControllers();
+
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -38,7 +38,6 @@ builder.Services.AddAuthentication(opt =>
     });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -53,17 +52,24 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Configuraci�n para JWT en Swagger
+    // Configuración para JWT en Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
     });
 });
-
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
 //Add sql connection string
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
@@ -111,6 +117,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
