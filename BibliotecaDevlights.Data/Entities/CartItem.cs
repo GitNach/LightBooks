@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BibliotecaDevlights.Data.Entities
+﻿namespace BibliotecaDevlights.Data.Entities
 {
     public class CartItem
     {
@@ -11,6 +7,7 @@ namespace BibliotecaDevlights.Data.Entities
         public int BookId { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
+        public string Type { get; set; } = "Purchase";
         public Cart Cart { get; set; } = null!;
         public Book? Book
         {

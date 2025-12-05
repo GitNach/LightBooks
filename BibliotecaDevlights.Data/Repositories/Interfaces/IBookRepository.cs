@@ -14,5 +14,7 @@ namespace BibliotecaDevlights.Data.Repositories.Interfaces
         Task<IEnumerable<Book>> GetByCategoryAsync(int categoryId);
         Task<IEnumerable<Book>> SearchAsync(string searchTerm);
 
+        Task UpdateAsync(Book book);
+
     }
 }

@@ -71,7 +71,7 @@ namespace BibliotecaDevlights.Data.Repositories.Implementations
 
         public async Task<bool> ExistsAsync(int orderId)
         {
-            return await _context.Orders.AnyAsync(o=> o.Id == orderId);
+            return await _context.Orders.AnyAsync(o => o.Id == orderId);
 
         }
 

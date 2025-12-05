@@ -98,5 +98,12 @@ namespace BibliotecaDevlights.Data.Repositories.Implementations
                             (b.StockRental > 0).ToString().ToLower().Contains(lowerSearchTerm))
                 .ToList();
         }
+
+        public async Task UpdateAsync(Book book)
+        {
+            _context.Books.Update(book);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

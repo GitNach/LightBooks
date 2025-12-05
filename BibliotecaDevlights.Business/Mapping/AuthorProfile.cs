@@ -10,7 +10,9 @@ namespace BibliotecaDevlights.Business.Mapping
         {
             CreateMap<CreateAuthorDto, Author>();
             CreateMap<UpdateAuthorDto, Author>();
-            CreateMap<Author, AuthorDto>();
+            CreateMap<Author, AuthorDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => 
+                    $"{src.FirstName} {src.LastName}"));
         }
     }
 }
