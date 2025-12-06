@@ -77,10 +77,18 @@ namespace BibliotecaDevlights.Business.Services.Implementations
 
             await _cartService.ValidateCartStockAsync(userId);
 
-            var order = _mapper.Map<Order>(cart);
-            order.UserId = cart.UserId;
-            order.OrderDate = DateTime.UtcNow;
-            order.Status = OrderStatus.Pending;
+            var order = new Order
+            {
+                UserId = cart.UserId,
+                OrderDate = DateTime.UtcNow,
+                Status = OrderStatus.Pending,
+                OrderItems = cart.CartItems!.Select(ci => new OrderItem
+                {
+                    BookId = ci.BookId,
+                    Quantity = ci.Quantity,
+                    Price = ci.Price,
+                }).ToList()
+            };
 
             try
             {
@@ -100,6 +108,7 @@ namespace BibliotecaDevlights.Business.Services.Implementations
                         await _bookRepository.UpdateAsync(book);
                     }
                 }
+
                 await _cartRepository.ClearCartAsync(userId);
 
                 return _mapper.Map<OrderDto>(order);

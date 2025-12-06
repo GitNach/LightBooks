@@ -2,6 +2,7 @@
 using BibliotecaDevlights.Business.Mapping;
 using BibliotecaDevlights.Business.Services.Implementations;
 using BibliotecaDevlights.Business.Services.Interfaces;
+using BibliotecaDevlights.Business.Utilities;
 using BibliotecaDevlights.Data.Data;
 using BibliotecaDevlights.Data.Repositories.Implementations;
 using BibliotecaDevlights.Data.Repositories.Interfaces;
@@ -96,6 +97,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 
 builder.Services.AddAutoMapper(cfg =>
 {

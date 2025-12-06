@@ -32,6 +32,7 @@ namespace BibliotecaDevlights.Data.Repositories.Implementations
         {
             return await _context.Orders.AsNoTracking()
                 .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems!)
                 .ToListAsync();
         }
 

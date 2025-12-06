@@ -1,8 +1,8 @@
 ﻿using BibliotecaDevlights.Business.DTOs.Cart;
 using BibliotecaDevlights.Business.Services.Interfaces;
+using BibliotecaDevlights.Business.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace BibliotecaDevlights.API.Controllers
 {
@@ -12,23 +12,18 @@ namespace BibliotecaDevlights.API.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
-        public CartController(ICartService cartService)
+        private readonly IUserContextService _userContextService;
+
+        public CartController(ICartService cartService, IUserContextService userContextService)
         {
             _cartService = cartService;
-        }
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
-            if (userIdClaim == null)
-                throw new UnauthorizedAccessException("Usuario no autenticado");
-
-            return int.Parse(userIdClaim.Value);
+            _userContextService = userContextService;
         }
 
         [HttpGet]
         public async Task<ActionResult<CartDto>> GetCart()
         {
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             var cart = await _cartService.GetOrCreateCartAsync(userId);
             return Ok(cart);
         }
@@ -40,7 +35,7 @@ namespace BibliotecaDevlights.API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             var cart = await _cartService.AddItemToCartAsync(userId, addToCart);
             return Ok(cart);
         }
@@ -52,7 +47,7 @@ namespace BibliotecaDevlights.API.Controllers
             {
                 return BadRequest("La cantidad debe ser mayor que cero.");
             }
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             var cart = await _cartService.UpdateCartItemQuantityAsync(userId, itemId, quantity);
             return Ok(cart);
         }
@@ -60,7 +55,7 @@ namespace BibliotecaDevlights.API.Controllers
         [HttpDelete("items/{itemId}")]
         public async Task<ActionResult<CartDto>> RemoveItemFromCart(int itemId)
         {
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             var cart = await _cartService.RemoveItemFromCartAsync(userId, itemId);
             if (cart == null)
             {
@@ -72,7 +67,7 @@ namespace BibliotecaDevlights.API.Controllers
         [HttpDelete]
         public async Task<IActionResult> ClearCart()
         {
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             await _cartService.ClearCartAsync(userId);
             return NoContent();
         }
@@ -80,7 +75,7 @@ namespace BibliotecaDevlights.API.Controllers
         [HttpPost("validate-stock")]
         public async Task<IActionResult> ValidateCartStock()
         {
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             await _cartService.ValidateCartStockAsync(userId);
             return Ok(new { message = "Stock validado correctamente." });
         }
@@ -88,7 +83,7 @@ namespace BibliotecaDevlights.API.Controllers
         [HttpGet("item-count")]
         public async Task<ActionResult<int>> GetCartItemCount()
         {
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             var count = await _cartService.GetCartItemCountAsync(userId);
             return Ok(count);
         }
@@ -96,7 +91,7 @@ namespace BibliotecaDevlights.API.Controllers
         [HttpGet("total")]
         public async Task<ActionResult<decimal>> GetCartTotal()
         {
-            var userId = GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             var total = await _cartService.GetCartTotalAsync(userId);
             return Ok(total);
         }
