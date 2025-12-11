@@ -26,5 +26,7 @@ namespace BibliotecaDevlights.Business.Services.Interfaces
 
 
         Task<bool> UserOwnsOrderAsync(int orderId, int userId);
+
+        Task<decimal> GetOrderTotalAmountAsync(int orderId);
     }
 }

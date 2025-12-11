@@ -249,6 +249,15 @@ namespace BibliotecaDevlights.Business.Services.Implementations
             return false;
         }
 
+        public async Task<decimal> GetOrderTotalAmountAsync(int orderId)
+        {
+            var order =  await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                throw new KeyNotFoundException("Order not found");
+            }
+            return order.TotalAmount;
+        }
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BibliotecaDevlight.Data.Seeders;
+using BibliotecaDevlights.API.Middleware;
 using BibliotecaDevlights.Business.Mapping;
 using BibliotecaDevlights.Business.Services.Implementations;
 using BibliotecaDevlights.Business.Services.Interfaces;
@@ -19,6 +20,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddAuthentication(opt =>
 {
@@ -92,6 +102,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 //Services
 builder.Services.AddScoped<IBookService, BookService>();
@@ -101,7 +112,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+//AutoMapper Profiles
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<AuthorProfile>();
@@ -110,6 +123,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<UserProfile>();
     cfg.AddProfile<CartProfile>();
     cfg.AddProfile<OrderProfile>();
+
 });
 
 var app = builder.Build();
@@ -132,7 +146,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseCors("AllowAll");
 app.MapControllers();
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Run();
