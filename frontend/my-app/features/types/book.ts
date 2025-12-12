@@ -29,8 +29,11 @@ export interface BookDTO {
   categoryName: string;
 }
 export interface BookDetailsDTO extends BookDTO {
-    category : string | { id: string; name: string };
-    author : string | { id: string; fullName: string; firstName?: string; lastName?: string };
+  publishedDate?: string;
+  category: string | { id: string; name: string };
+  author:
+    | string
+    | { id: string; fullName: string; firstName?: string; lastName?: string };
 }
 export interface CreateBookDTO {
   title: string;

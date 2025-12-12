@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 import { updateBookAction } from "@/features/books/actions/bookActions";
+import { getBookById } from "@/features/books/services/bookService";
 import { UpdateBookDTO } from "@/features/types/book";
-import { useRouter } from "next/router";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const updateBookForm: UpdateBookDTO = {
-   title: "",
+  title: "",
   isbn: "",
   description: "",
   purchasePrice: 0,
@@ -16,23 +19,54 @@ const updateBookForm: UpdateBookDTO = {
   authorId: "",
   categoryId: "",
 };
+
 export default function EditBookPage() {
-const [formData, setFormData] = useState<UpdateBookDTO>(updateBookForm);
+  const params = useParams(); 
+  const bookId = params.id as string; 
+  
+  const [formData, setFormData] = useState<UpdateBookDTO>(updateBookForm);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const router = useRouter();
-  const bookId = router.query.id as string;
- const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
 
+
+  useEffect(() => {
+    const loadBook = async () => {
+      try {
+        const book = await getBookById(bookId);
+        setFormData({
+          title: book.title,
+          isbn: book.isbn,
+          description: book.description || "",
+          purchasePrice: book.purchasePrice,
+          rentalPricePerDay: book.rentalPricePerDay,
+          stockPurchase: book.stockPurchase,
+          stockRental: book.stockRental,
+          imageUrl: book.imageUrl || "",
+          publishedDate: book.publishedDate,
+          authorId: typeof book.author === 'string' ? book.author : book.author.id,
+          categoryId: typeof book.category === 'string' ? book.category : book.category.id,
+        });
+      } catch (err) {
+        setError("Error al cargar el libro");
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadBook();
+  }, [bookId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const result = await updateBookAction(bookId,formData);
+      const result = await updateBookAction(bookId, formData); 
 
       if (result.success && result.data?.id) {
-        setFormData(updateBookForm);
         router.push(`/books/${result.data.id}`);
       } else {
         setError(result.message);
@@ -43,11 +77,16 @@ const [formData, setFormData] = useState<UpdateBookDTO>(updateBookForm);
       setLoading(false);
     }
   };
-   return (
+
+  if (loadingData) {
+    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+  }
+
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-3xl font-bold mb-6 text-center">
-          Agregar nuevo libro
+          Editar libro
         </h1>
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded mb-4">
@@ -236,7 +275,7 @@ const [formData, setFormData] = useState<UpdateBookDTO>(updateBookForm);
             disabled={loading}
             className="w-full bg-blue-500 text-white font-semibold py-2 rounded hover:bg-blue-600 disabled:opacity-50 transition"
           >
-            {loading ? "Creando Libro" : "Crear Libro"}
+            {loading ? "Actualizando Libro" : "Actualizar Libro"}
           </button>
         </form>
       </div>

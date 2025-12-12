@@ -29,14 +29,16 @@ export default function NewBookPage() {
     setError("");
     setLoading(true);
 
-    try {
+     try {
       const result = await createBookAction(formData);
 
-      if (result.success && result.data?.id) {
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+
+      if (result.data?.id) {
         setFormData(initialForm);
         router.push(`/books/${result.data.id}`);
-      } else {
-        setError(result.message);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -44,7 +46,6 @@ export default function NewBookPage() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
