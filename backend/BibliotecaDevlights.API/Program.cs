@@ -12,21 +12,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
 builder.Services.AddControllers();
 
+// CORS: allow the frontend origin and credentials (cookies)
+var frontendUrl = builder.Configuration["Frontend:Url"] ?? "http://localhost:3000";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(frontendUrl)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -86,12 +87,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//Add sql connection string
+// Add sql connection string with transient retry enabled
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("BibliotecaDevlights.Data")));
-
+        sqlOptions =>
+        {
+            sqlOptions.MigrationsAssembly("BibliotecaDevlights.Data");
+            sqlOptions.EnableRetryOnFailure(); // retries para fallos transitorios
+        }));
 
 builder.Services.AddHttpContextAccessor();
 
@@ -128,11 +132,22 @@ builder.Services.AddAutoMapper(cfg =>
 
 var app = builder.Build();
 
-// Inicializar la base de datos con datos de prueba
+// Inicializar la base de datos con datos de prueba: aplicar migraciones antes del seed
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    DbInitializer.Initialize(context);
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        // Aplica migraciones pendientes (crea BD si hace falta)
+        context.Database.Migrate();
+        DbInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error applying migrations or seeding the database.");
+        throw;
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -150,3 +165,5 @@ app.UseCors("AllowAll");
 app.MapControllers();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Run();
+
+

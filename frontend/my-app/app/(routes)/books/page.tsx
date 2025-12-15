@@ -1,4 +1,4 @@
-import BookList from "@/features/books/components/bookList";
+import BookList from "@/features/books/components/BookList";
 import Link from "next/link";
 import { Suspense } from "react";
 import Loading from "./loading";
